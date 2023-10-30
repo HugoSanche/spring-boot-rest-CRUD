@@ -1,81 +1,79 @@
 package com.individual.rest;
 
 import com.individual.entity.Individual;
-import jakarta.annotation.PostConstruct;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.individual.service.IndividualService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class IndividualRestController {
-    List<Individual> theIndividual=new ArrayList<>();
-    @PostConstruct
-    public void postConstructor() throws ParseException {
-        SimpleDateFormat format=new SimpleDateFormat("dd/MM/yyyy");
 
-        theIndividual=new ArrayList<>();
-        theIndividual.add(new Individual("Hugo","Baltazar","Sanchez","soltero",
-                format.parse("07/08/2000"),"Mexicana"));
-        theIndividual.add(new Individual("Veronica","Perez","Sanchez","casada",
-                format.parse("07/08/1986"),"Mexicana"));
-        theIndividual.add(new Individual("Alberto","Martinez","Lopez","casado",
-                format.parse("07/08/1975"),"Mexicana"));
+
+    private IndividualService individualService;
+
+    public IndividualRestController(IndividualService individualService) {
+        this.individualService = individualService;
     }
 
+    // Add mapping GET for all individual
     @GetMapping("/individual")
     public List<Individual> getIndividual()  {
-        return theIndividual;
+        return individualService.findAll();
     }
-    @GetMapping("individual/{id}")
-    public Individual getTheIndividualbyID(@PathVariable int id){
 
+    //Add mapping for GET / individual .- Get individual by id
+
+    @GetMapping("/individual/{individualId}")
+    public Individual getIndividualbyID(@PathVariable  int individualId){
+        Individual theIndividual=individualService.findById(individualId);
 
         // check if the individual be en the list size
-        if (id>=theIndividual.size() || id<0 ){
-                throw new IndividualNotFoundException("Individual id not found - "+id);
+        if (theIndividual==null){
+                throw new IndividualNotFoundException("Individual id not found - "+theIndividual);
         }
-        return theIndividual.get(id);
+        return theIndividual;
 
     }
-    // Add an exception handler using @ExceptionHandler
 
+    // add mapping for POST / individuals .- Add new individual
+    @Transactional
+    @PostMapping("/individuals")
+    public Individual addIndividual(@RequestBody Individual theIndividual){
 
-    //Help to catch error and show the error en the browser  ExceptionHandler*//////
+        //also just in case they pass an id in JSON  ... set id to 0
+        // this is to force a save of new item ... instead of update
+        theIndividual.setPerson(0);
 
+        Individual dbIndividual=individualService.save(theIndividual);
+        return dbIndividual;
 
-    @ExceptionHandler
-    public ResponseEntity<IndividualErrorResponse> handleException (IndividualNotFoundException exc){
-        // create a StudentErrorResponse
+    }
+    //add mapping for PUT / individual.- updating existing individual
 
-        IndividualErrorResponse error =new IndividualErrorResponse();
-        error.setStatus(HttpStatus.NOT_FOUND.value());
-        error.setMessage(exc.getMessage());
-        error.setTimeStamp(System.currentTimeMillis());
-
-        //return ResponseEntity
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    @PutMapping("/individual")
+    public Individual updateIndividual(@RequestBody Individual theIndividual){
+        Individual dbIndividual=individualService.save(theIndividual);
+        return dbIndividual;
     }
 
-    // add another exception handler .. to catch any exception (catch all)
+    //Add mapping for DELETE  /individuals/{individualId} - delete individual
 
-    @ExceptionHandler
-    public ResponseEntity<IndividualErrorResponse> handleException (Exception exc){
-        // create a StudentErrorResponse
+    @DeleteMapping("/individuals/{individualId}")
+    public String deleteIndividual(@PathVariable int individualId){
+        Individual dbIndividual=individualService.findById(individualId);
 
-        IndividualErrorResponse error =new IndividualErrorResponse();
-        error.setStatus(HttpStatus.BAD_REQUEST.value());
-        error.setMessage(exc.getMessage());
-        error.setTimeStamp(System.currentTimeMillis());
+        if (dbIndividual==null){
+            throw new RuntimeException("Employee id not found "+individualId);
+        }
+        individualService.deletedById(individualId);
 
-        //return ResponseEntity
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return "Deleted individual id "+individualId;
     }
+
+
 }
 
 

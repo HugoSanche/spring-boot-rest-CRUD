@@ -1,12 +1,11 @@
-package com.individual.DAO;
+package com.individual.service;
 
 import com.individual.entity.Individual;
 
 import java.util.List;
 
-public interface IndividualDAO {
+public interface IndividualService {
     List<Individual> findAll();
-
     Individual findById(int theId);
     Individual save(Individual theIndividual);
 
