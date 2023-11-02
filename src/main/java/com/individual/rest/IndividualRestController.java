@@ -68,7 +68,7 @@ public class IndividualRestController {
         if (dbIndividual==null){
             throw new RuntimeException("Employee id not found "+individualId);
         }
-        individualService.deletedById(individualId);
+        individualService.deleteById(individualId);
 
         return "Deleted individual id "+individualId;
     }

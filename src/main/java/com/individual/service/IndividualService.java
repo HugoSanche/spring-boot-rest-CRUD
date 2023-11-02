@@ -9,5 +9,5 @@ public interface IndividualService {
     Individual findById(int theId);
     Individual save(Individual theIndividual);
 
-    void deletedById(int theId);
+    void deleteById(int theId);
 }

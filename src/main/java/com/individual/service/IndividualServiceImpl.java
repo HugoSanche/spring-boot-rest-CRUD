@@ -1,42 +1,64 @@
 package com.individual.service;
 
-import com.individual.DAO.IndividualDAO;
+import com.individual.DAO.IndividualRepository;
 import com.individual.entity.Individual;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class IndividualServiceImpl implements IndividualService{
+public class IndividualServiceImpl implements IndividualService {
 
-    private IndividualDAO individualDAO;
+    private IndividualRepository individualRepository;
 
     @Autowired
-    public IndividualServiceImpl(IndividualDAO individualDAO) {
-        this.individualDAO = individualDAO;
+    public IndividualServiceImpl(IndividualRepository individualRepository) {
+        this.individualRepository = individualRepository;
     }
 
     @Override
     public List<Individual> findAll() {
-        return individualDAO.findAll();
+        return individualRepository.findAll();
+    }
+
+    @Override
+    public void deleteById(int theId) {
+        individualRepository.deleteById(theId);
     }
 
     @Override
     public Individual findById(int theId) {
-        return individualDAO.findById(theId);
+        Optional<Individual> result=individualRepository.findById(theId);
+
+        Individual theIndividual=null;
+        if (result.isPresent()){
+            theIndividual=result.get();
+        }else{
+            throw new RuntimeException("The id for the individual does not exist "+theId);
+        }
+        return theIndividual;
     }
 
-    @Transactional
     @Override
     public Individual save(Individual theIndividual) {
-        return individualDAO.save(theIndividual);
+        return individualRepository.save(theIndividual);
     }
 
-    @Transactional
-    @Override
-    public void deletedById(int theId) {
-        individualDAO.deletedById(theId);
-    }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
